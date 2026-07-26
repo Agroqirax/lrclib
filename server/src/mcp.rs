@@ -26,19 +26,17 @@ pub struct TrackResponse {
     instrumental: bool,
     plain_lyrics: Option<String>,
     synced_lyrics: Option<String>,
-    lyricsfile: Option<String>,
 }
 
 impl From<SimpleTrack> for TrackResponse {
     fn from(track: SimpleTrack) -> Self {
-        let (instrumental, plain_lyrics, synced_lyrics, lyricsfile) = match track.last_lyrics {
+        let (instrumental, plain_lyrics, synced_lyrics) = match track.last_lyrics {
             Some(lyrics) => (
                 lyrics.instrumental,
                 lyrics.plain_lyrics,
                 lyrics.synced_lyrics,
-                lyrics.lyricsfile,
             ),
-            None => (false, None, None, None),
+            None => (false, None, None),
         };
 
         TrackResponse {
@@ -51,7 +49,6 @@ impl From<SimpleTrack> for TrackResponse {
             instrumental,
             plain_lyrics,
             synced_lyrics,
-            lyricsfile,
         }
     }
 }
@@ -109,7 +106,9 @@ impl LrclibMcpServer {
 #[tool_router]
 impl LrclibMcpServer {
     #[tool(
-        description = "Look up synced/plain lyrics for a track by track name, artist name, and optionally album name/duration. Returns a not-found error if there is no close match."
+        title = "Get lyrics by metadata",
+        description = "Look up synced/plain lyrics for a track by track name, artist name, and optionally album name/duration. Returns a not-found error if there is no close match.",
+        annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn get_lyrics(
         &self,
@@ -142,7 +141,11 @@ impl LrclibMcpServer {
         }
     }
 
-    #[tool(description = "Look up lyrics for a track by its LRCLIB numeric track id.")]
+    #[tool(
+        title = "Get lyrics by track id",
+        description = "Look up lyrics for a track by its LRCLIB numeric track id.",
+        annotations(read_only_hint = true, open_world_hint = false)
+    )]
     async fn get_lyrics_by_id(
         &self,
         Parameters(params): Parameters<GetLyricsByIdRequest>,
@@ -157,7 +160,9 @@ impl LrclibMcpServer {
     }
 
     #[tool(
-        description = "Search LRCLIB for tracks/lyrics by free-text query and/or track/artist/album name. Returns an empty list rather than an error when nothing matches."
+        title = "Search lyrics",
+        description = "Search LRCLIB for tracks/lyrics by free-text query and/or track/artist/album name. Returns an empty list rather than an error when nothing matches.",
+        annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn search_lyrics(
         &self,
